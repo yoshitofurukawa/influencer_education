@@ -6,6 +6,11 @@ use Illuminate\Support\Facades\Schema;
 
 class CreateDeliveryTimesTable extends Migration
 {
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
     public function up()
     {
         Schema::create('delivery_times', function (Blueprint $table) {

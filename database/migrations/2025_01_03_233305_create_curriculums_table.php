@@ -19,7 +19,7 @@ class CreateCurriculumsTable extends Migration
             $table->string('thumbnail', 255)->nullable();
             $table->longText('description')->nullable();
             $table->mediumText('video_url')->nullable();
-            $table->tinyInteger('always_delivery_flg')->default(0);
+            $table->tinyInteger('alway_delivery_flg')->default(0);
             $table->unsignedBigInteger('grade_id');
             $table->foreign('grade_id')->references('id')->on('grades')->onDelete('cascade');
             $table->timestamps();

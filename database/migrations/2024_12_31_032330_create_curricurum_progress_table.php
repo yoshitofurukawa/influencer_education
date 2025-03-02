@@ -20,10 +20,10 @@ return new class extends Migration
             $table->integer('curriculum_id')->unsigned();
             $table->integer('user_id')->unsigned();
             $table->tinyInteger('clear_flg')->unsigned()->default(0); // Default 0 for not cleared
-            $table->timestamp('created_at');
-            $table->timestamp('updated_at');
+            $table->timestamp('created_at')->nullable();
+            $table->timestamp('updated_at')->nullable();
         });
-    
+
     }
 
     /**

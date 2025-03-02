@@ -3,7 +3,10 @@
 namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+
+use App\Models\DeliveryTime;
 use Illuminate\Database\Seeder;
+use Database\Seeders\CurriculumsTableSeeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -14,11 +17,16 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-        // \App\Models\User::factory(10)->create();
 
-        // \App\Models\User::factory()->create([
-        //     'name' => 'Test User',
-        //     'email' => 'test@example.com',
-        // ]);
+
+        // `curriculums` を作成
+        \App\Models\Curriculum::factory(20)->create();
+
+        \App\Models\DeliveryTime::factory(20)->create();
+
+        $this->call(CurriculumsTableSeeder::class);
+
+        // `delivery_times` のシードを実行
+        $this->call(DeliveryTimesTableSeeder::class);
     }
 }

@@ -13,25 +13,28 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('grades', function (Blueprint $table) {
-            $table->id();
-            $table->string('name', 255);
-            $table->timestamps();
-        });
+        if (!Schema::hasTable('grades')) {
+            Schema::create('grades', function (Blueprint $table) {
+                $table->id();
+                $table->string('name', 255);
+                $table->timestamps();
+            });
 
-        // 外部キー制約の追加
-        Schema::table('curriculums', function (Blueprint $table) {
-            $table->foreign('grade_id')->references('id')->on('grades')->onDelete('cascade');
-        });
+            // 外部キー制約の追加
+            Schema::table('curriculums', function (Blueprint $table) {
+                $table->foreign('grade_id')->references('id')->on('grades')->onDelete('cascade');
+            });
 
-        Schema::table('users', function (Blueprint $table) {
-            $table->foreign('grade_id')->references('id')->on('grades')->onDelete('cascade');
-        });
+            Schema::table('users', function (Blueprint $table) {
+                $table->foreign('grade_id')->references('id')->on('grades')->onDelete('cascade');
+            });
 
-        Schema::table('classes_clear_checks', function (Blueprint $table) {
-            $table->foreign('grade_id')->references('id')->on('grades')->onDelete('cascade');
-        });
-    }
+            Schema::table('classes_clear_checks', function (Blueprint $table) {
+                $table->foreign('grade_id')->references('id')->on('grades')->onDelete('cascade');
+            });
+        }
+        }
+
 
     /**
      * Reverse the migrations.
@@ -56,4 +59,3 @@ return new class extends Migration
         Schema::dropIfExists('grades');
     }
 };
-

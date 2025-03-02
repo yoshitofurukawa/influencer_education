@@ -21,18 +21,18 @@ return new class extends Migration
             // $table->string('password');
             // $table->rememberToken();
             // $table->timestamps();
-            
+
             // $table->id();
             // $table->timestamps();
             $table->bigIncrements('id');
             $table->string('name', 255);
-            $table->string('name_kana', 255);
+            $table->string('name_kana', 255)->nullable();
             $table->string('email', 255)->unique();
             $table->string('password', 255);
             $table->string('profile_image', 255)->nullable();
-            $table->integer('grade_id')->unsigned();
-            $table->timestamp('created_at');
-            $table->timestamp('updated_at');
+            $table->unsignedBigInteger('grade_id')->nullable();
+            $table->timestamp('created_at')->nullable();
+            $table->timestamp('updated_at')->nullable();
         });
     }
 

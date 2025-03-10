@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\ProfileUpdateRequest;
 use App\Http\Requests\UpdatePasswordRequest;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
 class ProfileController extends Controller
@@ -21,10 +22,19 @@ class ProfileController extends Controller
     {
         $user = Auth::user();
 
-        if ($user->updateProfile($request)) {
-            return redirect()->route('user.show.profile')->with('success', 'プロフィールが更新されました。');
-        } else {
-            return redirect()->route('user.show.profile')->with('error', 'プロフィールの更新中にエラーが発生しました。');
+        // トランザクション開始
+        DB::beginTransaction();
+        try {
+            if ($user->updateProfile($request)) {
+                DB::commit(); // 成功したらコミット
+                return redirect()->route('user.show.profile')->with('success', 'プロフィールが更新されました。');
+            } else {
+                DB::rollBack(); // 失敗したらロールバック
+                return redirect()->route('user.show.profile')->with('error', 'プロフィールの更新中にエラーが発生しました。');
+            }
+        } catch (\Exception $e) {
+            DB::rollBack(); // 例外発生時もロールバック
+            return redirect()->route('user.show.profile')->with('error', '予期しないエラーが発生しました: ' . $e->getMessage());
         }
     }
 
@@ -39,15 +49,23 @@ class ProfileController extends Controller
     {
         $user = Auth::user();
 
-        // 現在のパスワードが一致しているか確認
-        if (!Hash::check($request->current_password, $user->password)) {
-            return redirect()->back()->withErrors(['current_password' => '現在のパスワードが違います。']);
+        // トランザクション開始
+        DB::beginTransaction();
+        try {
+            // 現在のパスワードが一致しているか確認
+            if (!Hash::check($request->current_password, $user->password)) {
+                return redirect()->back()->withErrors(['current_password' => '現在のパスワードが違います。']);
+            }
+
+            // 新しいパスワードを設定
+            $user->password = Hash::make($request->new_password);
+            $user->save();
+
+            DB::commit(); // 成功したらコミット
+            return redirect()->route('user.show.profile')->with('status', 'パスワードが変更されました。');
+        } catch (\Exception $e) {
+            DB::rollBack(); // 例外発生時はロールバック
+            return redirect()->route('user.show.profile')->with('error', '予期しないエラーが発生しました: ' . $e->getMessage());
         }
-
-        // 新しいパスワードを設定
-        $user->password = Hash::make($request->new_password);
-        $user->save();
-
-        return redirect()->route('user.show.profile')->with('status', 'パスワードが変更されました。');
     }
 }

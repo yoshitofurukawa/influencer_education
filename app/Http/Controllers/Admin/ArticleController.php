@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\CreateArticleRequest;
 use App\Http\Requests\UpdateArticleRequest;
 use App\Models\Article;
 use Illuminate\Support\Facades\DB;
@@ -30,31 +31,53 @@ class ArticleController extends Controller
     }
 
     // お知らせを作成
-    public function createArticle(Request $request)
+    public function createArticle(CreateArticleRequest $request)
     {
-        $validatedData = $request->validate([
-            'title' => 'required|max:255',
-            'content' => 'required',
-        ]);
+        DB::beginTransaction();
+        try {
+            Article::create([
+                'title' => $request->input('title'),
+                'article_contents' => $request->input('content'),
+                'posted_date' => now(),
+            ]);
 
-        Article::createArticle($validatedData);
-
-        return redirect()->route('admin.show.article.list')->with('success', 'お知らせを作成しました。');
+            DB::commit();
+            return redirect()->route('admin.show.article.list')->with('success', 'お知らせを作成しました。');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->route('admin.show.article.list')->with('error', 'お知らせの作成中にエラーが発生しました: ' . $e->getMessage());
+        }
     }
 
     // お知らせを更新
     public function updateArticle(UpdateArticleRequest $request, $id)
     {
-        Article::updateArticle($id, $request->validated());
+        DB::beginTransaction();
+        try {
+            $article = Article::findOrFail($id);
+            $article->update($request->validated());
 
-        return redirect()->route('admin.show.article.edit', ['id' => $id])->with('success', 'お知らせを更新しました。');
+            DB::commit();
+            return redirect()->route('admin.show.article.edit', ['id' => $id])->with('success', 'お知らせを更新しました。');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->route('admin.show.article.edit', ['id' => $id])->with('error', 'お知らせの更新中にエラーが発生しました: ' . $e->getMessage());
+        }
     }
 
     // お知らせを削除
     public function deleteArticle($id)
     {
-        Article::deleteArticle($id);
+        DB::beginTransaction();
+        try {
+            $article = Article::findOrFail($id);
+            $article->delete();
 
-        return redirect()->route('admin.show.article.list')->with('success', 'お知らせを削除しました。');
+            DB::commit();
+            return redirect()->route('admin.show.article.list')->with('success', 'お知らせを削除しました。');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->route('admin.show.article.list')->with('error', 'お知らせの削除中にエラーが発生しました: ' . $e->getMessage());
+        }
     }
 }
